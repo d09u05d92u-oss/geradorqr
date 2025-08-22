@@ -1,211 +1,405 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de QR Code Personalizado</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #000; /* Preto */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            color: #fff; /* Texto branco para contraste */
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gerador de QR Code • Preto & Azul</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <style>
+    :root{
+      --azul:#1e90ff;
+      --azul-escuro:#0b3163;
+      --preto:#0b0f14;
+      --cinza:#101826;
+      --borda:#1e2a3a;
+      --texto:#e6f1ff;
+      --texto-suave:#b8c7e0;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1000px 700px at 80% -20%, rgba(30,144,255,.15), transparent),
+                  radial-gradient(1200px 800px at -10% 10%, rgba(11,49,99,.35), transparent),
+                  var(--preto);
+      color:var(--texto);
+      min-height:100dvh;
+    }
+    header{
+      padding:24px;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      position:sticky; top:0; backdrop-filter: blur(6px); background: rgba(11,15,20,.6);
+      border-bottom:1px solid var(--borda);
+      z-index:10;
+    }
+    header h1{margin:0; font-size:clamp(18px, 3vw, 24px); letter-spacing:.5px}
+    header .brand{display:inline-flex; align-items:center; gap:10px; color:var(--texto)}
+    header .logo-dot{width:12px;height:12px;border-radius:50%;background:var(--azul); box-shadow:0 0 10px var(--azul)}
 
-        .container {
-            background-color: #1a237e; /* Azul escuro */
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            width: 90%;
-            max-width: 500px;
-        }
+    .wrap{
+      display:grid; gap:20px; padding:24px; max-width:1100px; margin:0 auto;
+      grid-template-columns: 1.2fr .8fr;
+    }
+    @media (max-width: 900px){ .wrap{grid-template-columns: 1fr} }
 
-        h1 {
-            color: #ffeb3b; /* Amarelo */
-            margin-bottom: 20px;
-        }
+    .card{
+      background:linear-gradient(180deg, rgba(16,24,38,.9), rgba(16,24,38,.85));
+      border:1px solid var(--borda);
+      border-radius:18px; padding:18px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    .card h2{margin:.2rem 0 1rem; font-size:18px; color:var(--texto); font-weight:700}
+    .sub{color:var(--texto-suave); font-size:13px}
 
-        .input-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
-            text-align: left;
-        }
+    .controls{display:grid; gap:14px}
+    .row{display:grid; gap:10px; grid-template-columns: 1fr 1fr}
+    @media (max-width: 560px){.row{grid-template-columns:1fr}}
 
-        label {
-            color: #fff;
-            font-weight: bold;
-        }
+    label{font-size:13px; color:var(--texto-suave); margin-bottom:6px; display:block}
+    input[type="text"], input[type="number"], select{
+      width:100%; padding:12px 14px; background:#0f1725; color:var(--texto);
+      border:1px solid var(--borda); border-radius:12px; outline:none;
+    }
+    input[type="file"]{width:100%; color:var(--texto-suave)}
+    input[type="color"]{height:40px; width:100%; border:none; background:transparent}
 
-        input, button {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
+    .btns{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
+    button{
+      appearance:none; border:none; border-radius:14px; padding:12px 16px;
+      background:linear-gradient(180deg, var(--azul), #1676d1);
+      color:white; font-weight:700; cursor:pointer; letter-spacing:.3px;
+      box-shadow: 0 8px 20px rgba(30,144,255,.35);
+    }
+    button.secondary{background:#0f1725; border:1px solid var(--borda); color:var(--texto)}
+    button:disabled{opacity:.6; cursor:not-allowed}
 
-        input::placeholder {
-            color: #aaa;
-        }
-
-        input[type="color"] {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            border: none;
-            cursor: pointer;
-        }
-
-        input[type="color"]::-webkit-color-swatch-wrapper {
-            padding: 0;
-        }
-
-        input[type="color"]::-webkit-color-swatch {
-            border: none;
-            border-radius: 5px;
-        }
-
-        #generate-btn {
-            background-color: #ffeb3b; /* Amarelo */
-            color: #000; /* Preto */
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-weight: bold;
-        }
-
-        #generate-btn:hover {
-            background-color: #fdd835;
-        }
-
-        .qr-code-container {
-            border: 2px dashed #64b5f6; /* Azul claro para destacar */
-            border-radius: 5px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: #e0f7fa; /* Um tom claro para o QR code */
-        }
-
-        #qrcode-canvas {
-            /* O tamanho será definido pelo JavaScript */
-        }
-
-        #logo-preview {
-            margin-top: 10px;
-        }
-    </style>
+    .qr-card{
+      display:grid; gap:16px; place-items:center; text-align:center
+    }
+    #qrCanvasWrap{
+      width:min(420px, 90vw); aspect-ratio:1; display:grid; place-items:center;
+      background:radial-gradient(600px 400px at 50% 0%, rgba(30,144,255,.12), transparent), #0c1422;
+      border:1px dashed #1d2a40; border-radius:20px; padding:20px
+    }
+    footer{color:var(--texto-suave); text-align:center; padding:30px 10px}
+    .hint{font-size:12px; color:var(--texto-suave)}
+    .separator{height:1px;background:var(--borda); margin:12px 0}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Gerador de QR Code Personalizado</h1>
-        <div class="input-container">
-            <label for="text-input">Texto/URL:</label>
-            <input type="text" id="text-input" placeholder="Digite o texto ou URL">
+  <header>
+    <div class="brand"><span class="logo-dot"></span> <h1>Gerador de QR Code — Preto & Azul</h1></div>
+  </header>
 
-            <label for="color-input">Cor do QR Code:</label>
-            <input type="color" id="color-input" value="#000000">
+  <main class="wrap">
+    <section class="card">
+      <h2>Configurações</h2>
+      <p class="sub">Escolha o tipo de QR Code e personalize:</p>
 
-            <label for="logo-upload">Logo da Empresa (opcional):</label>
-            <input type="file" id="logo-upload" accept="image/*">
+      <div class="controls">
+        <!-- Tipo de QR -->
+        <label for="tipoQR">Tipo de QR:</label>
+        <select id="tipoQR">
+          <option value="url" selected>URL / Texto</option>
+          <option value="pix">Pix</option>
+        </select>
 
-            <button id="generate-btn">Gerar QR Code</button>
+        <!-- Campos URL / Texto -->
+        <div id="urlFields">
+          <label for="data">Texto ou URL</label>
+          <input id="data" type="text" placeholder="https://seusite.com" value="https://seusite.com" />
         </div>
-        <div class="qr-code-container">
-            <canvas id="qrcode-canvas"></canvas>
-            <img id="logo-preview" src="#" alt="Prévia da Logo" style="display: none; max-width: 50px; max-height: 50px; margin-top: 10px;">
+
+        <!-- Campos Pix -->
+        <div id="pixFields" style="display:none; margin-top:10px;">
+          <label>Chave Pix</label>
+          <input id="pixKey" type="text" placeholder="email, CPF/CNPJ, celular ou chave aleatória" />
+          <label>Valor (R$) — opcional</label>
+          <input id="pixAmount" type="number" step="0.01" placeholder="0.00" />
+          <label>Nome do Recebedor</label>
+          <input id="pixName" type="text" placeholder="Nome completo" />
+          <label>Cidade</label>
+          <input id="pixCity" type="text" placeholder="Cidade" />
         </div>
-    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script>
-        const textInput = document.getElementById('text-input');
-        const colorInput = document.getElementById('color-input');
-        const logoUpload = document.getElementById('logo-upload');
-        const generateBtn = document.getElementById('generate-btn');
-        const qrcodeCanvas = document.getElementById('qrcode-canvas');
-        const logoPreview = document.getElementById('logo-preview');
-        const qrCodeContainer = document.querySelector('.qr-code-container');
-        let logoImage = null;
+        <!-- Personalização QR -->
+        <div class="row">
+          <div>
+            <label for="color">Cor dos pontos</label>
+            <input id="color" type="color" value="#0a0a0a" />
+          </div>
+          <div>
+            <label for="bgColor">Cor do fundo</label>
+            <input id="bgColor" type="color" value="#ffffff" />
+          </div>
+        </div>
 
-        logoUpload.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    logoPreview.src = e.target.result;
-                    logoPreview.style.display = 'block';
-                    logoImage = new Image();
-                    logoImage.onload = () => {
-                        // A logo estará pronta para ser usada ao gerar o QR code
-                    };
-                    logoImage.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                logoPreview.src = '#';
-                logoPreview.style.display = 'none';
-                logoImage = null;
-            }
-        });
+        <div class="row">
+          <div>
+            <label for="size">Tamanho (px)</label>
+            <input id="size" type="number" min="120" max="1200" value="360" />
+          </div>
+          <div>
+            <label for="margin">Margem</label>
+            <input id="margin" type="number" min="0" max="40" value="8" />
+          </div>
+        </div>
 
-        generateBtn.addEventListener('click', () => {
-            const text = textInput.value.trim();
-            const color = colorInput.value;
+        <div class="row">
+          <div>
+            <label for="ecc">Correção de erro</label>
+            <select id="ecc">
+              <option value="L">L (7%)</option>
+              <option value="M" selected>M (15%)</option>
+              <option value="Q">Q (25%)</option>
+              <option value="H">H (30%)</option>
+            </select>
+          </div>
+          <div>
+            <label for="shape">Estilo dos pontos</label>
+            <select id="shape">
+              <option value="square" selected>Quadrado</option>
+              <option value="dots">Pontos</option>
+              <option value="rounded">Arredondado</option>
+              <option value="classy">Classy</option>
+              <option value="classy-rounded">Classy Rounded</option>
+              <option value="extra-rounded">Extra Rounded</option>
+            </select>
+          </div>
+        </div>
 
-            if (text === '') {
-                alert('Por favor, digite algum texto ou URL.');
-                return;
-            }
+        <div>
+          <label for="logo">Logo da empresa (PNG/JPG/SVG)</label>
+          <input id="logo" type="file" accept="image/png, image/jpeg, image/svg+xml" />
+          <div class="hint">Dica: use PNG com fundo transparente para melhor resultado.</div>
+        </div>
 
-            clearCanvas();
-            generateQRCode(text, color, logoImage);
-        });
+        <div class="row">
+          <div>
+            <label for="logoSize">Tamanho da logo (%)</label>
+            <input id="logoSize" type="number" min="5" max="60" value="20" />
+          </div>
+          <div>
+            <label for="logoMargin">Margem da logo (px)</label>
+            <input id="logoMargin" type="number" min="0" max="20" value="2" />
+          </div>
+        </div>
 
-        function clearCanvas() {
-            const ctx = qrcodeCanvas.getContext('2d');
-            ctx.clearRect(0, 0, qrcodeCanvas.width, qrcodeCanvas.height);
+        <div class="row">
+          <div>
+            <label for="eyeColor">Cor dos marcadores (olhos)</label>
+            <input id="eyeColor" type="color" value="#1e90ff" />
+          </div>
+          <div>
+            <label for="eyeStyle">Estilo dos marcadores</label>
+            <select id="eyeStyle">
+              <option value="square" selected>Quadrado</option>
+              <option value="extra-rounded">Extra Rounded</option>
+              <option value="dot">Ponto</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button id="generate">Gerar / Atualizar</button>
+          <button id="downloadPng" class="secondary">Baixar PNG</button>
+          <button id="downloadSvg" class="secondary">Baixar SVG</button>
+          <button id="clearLogo" class="secondary">Remover logo</button>
+        </div>
+
+        <div class="separator"></div>
+      </div>
+    </section>
+
+    <section class="card qr-card">
+      <h2>Pré-visualização</h2>
+      <div id="qrCanvasWrap">
+        <div id="qr"></div>
+      </div>
+      <div class="hint">Use correção de erro "H" ao usar logos maiores para manter a leitura.</div>
+    </section>
+  </main>
+
+  <footer>
+    Feito com ❤️ para personalizar seu QR Code do jeito da sua marca.
+  </footer>
+
+  <!-- Lib de renderização -->
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
+  <script>
+    // -------------------------
+    // Estado e QR base
+    // -------------------------
+    const state = {
+      data: document.getElementById('data').value,
+      size: parseInt(document.getElementById('size').value,10),
+      margin: parseInt(document.getElementById('margin').value,10),
+      color: document.getElementById('color').value,
+      bgColor: document.getElementById('bgColor').value,
+      ecc: document.getElementById('ecc').value,
+      shape: document.getElementById('shape').value,
+      eyeColor: document.getElementById('eyeColor').value,
+      eyeStyle: document.getElementById('eyeStyle').value,
+      image: null,
+      logoSize: parseInt(document.getElementById('logoSize').value,10),
+      logoMargin: parseInt(document.getElementById('logoMargin').value,10)
+    };
+
+    const qr = new QRCodeStyling({
+      width: state.size,
+      height: state.size,
+      type: 'svg',
+      data: state.data,
+      image: state.image,
+      margin: state.margin,
+      qrOptions: { errorCorrectionLevel: state.ecc, typeNumber: 0, mode: 'Byte' },
+      dotsOptions: { color: state.color, type: state.shape },
+      backgroundOptions: { color: state.bgColor },
+      cornersSquareOptions: { color: state.eyeColor, type: mapEye(state.eyeStyle) },
+      cornersDotOptions: { color: state.eyeColor }
+    });
+    qr.append(document.getElementById('qr'));
+
+    function mapEye(style){ switch(style){ case 'extra-rounded': return 'extra-rounded'; case 'dot': return 'dot'; default: return 'square'; } }
+    function clampNum(v,min,max){ const n=parseInt(v,10); if(isNaN(n)) return min; return Math.max(min, Math.min(max,n)); }
+
+    function updateQR(){
+      qr.update({
+        width: state.size,
+        height: state.size,
+        data: state.data,
+        margin: state.margin,
+        qrOptions: { errorCorrectionLevel: state.ecc, typeNumber:0, mode:'Byte' },
+        dotsOptions: { color: state.color, type: state.shape },
+        backgroundOptions: { color: state.bgColor },
+        image: state.image,
+        imageOptions: { crossOrigin:'anonymous', margin: state.logoMargin, imageSize: state.logoSize/100 },
+        cornersSquareOptions: { color: state.eyeColor, type: mapEye(state.eyeStyle) },
+        cornersDotOptions: { color: state.eyeColor }
+      });
+    }
+
+    // Alterna campos conforme tipo
+    const tipoQR = document.getElementById('tipoQR');
+    const urlFields = document.getElementById('urlFields');
+    const pixFields = document.getElementById('pixFields');
+    tipoQR.addEventListener('change',()=>{
+      if(tipoQR.value==='pix'){ pixFields.style.display='block'; urlFields.style.display='none'; }
+      else{ pixFields.style.display='none'; urlFields.style.display='block'; }
+    });
+
+    // -------------------------
+    // PIX: builder TLV EMV válido
+    // -------------------------
+    function tlv(id, value){
+      const len = value.length.toString().padStart(2,'0'); // 2 dígitos
+      return `${id}${len}${value}`;
+    }
+
+    function sanitize(str, maxLen){
+      // Remove acentos, mantém A-Z, 0-9, espaço e .- , upper-case e corta no limite
+      const s = (str||'')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // sem acentos
+        .replace(/[^A-Za-z0-9 .-]/g,' ')                 // somente caracteres seguros
+        .toUpperCase().trim();
+      return s.slice(0, maxLen);
+    }
+
+    // CRC-16/CCITT-FALSE (poly 0x1021, init 0xFFFF)
+    function crc16(payload){
+      let crc = 0xFFFF;
+      for(let i=0;i<payload.length;i++){
+        crc ^= payload.charCodeAt(i) << 8;
+        for(let j=0;j<8;j++){
+          crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) : (crc << 1);
+          crc &= 0xFFFF;
         }
+      }
+      return crc;
+    }
 
-        function generateQRCode(text, color, logo) {
-            const qrcode = new QRCode(qrcodeCanvas, {
-                text: text,
-                width: 256,
-                height: 256,
-                colorDark : color,
-                colorLight : "#fff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
+    // Gera payload Pix estático (valor opcional)
+    function generatePixPayload({key, amount, name, city, txId}){
+      const gui = 'br.gov.bcb.pix';
+      const chave = (key||'').trim();
+      const valor = amount && Number(amount)>0 ? Number(amount).toFixed(2) : ''; // opcional
+      const nome = sanitize(name, 25);
+      const cidade = sanitize(city, 15);
+      const txid = (txId && txId.trim()) ? txId.trim().slice(0,25) : '***'; // recomendado para estático
 
-            if (logo) {
-                const ctx = qrcodeCanvas.getContext('2d');
-                const logoSize = 60; // Tamanho da logo no QR code
-                const x = (qrcodeCanvas.width - logoSize) / 2;
-                const y = (qrcodeCanvas.height - logoSize) / 2;
+      // 00: Payload Format Indicator = "01"
+      const p00 = tlv('00','01');
+      // 01: Point of Initiation Method -> "11" (estático)
+      const p01 = tlv('01','11');
 
-                // Espera a imagem da logo carregar completamente
-                if (logo.complete) {
-                    ctx.drawImage(logo, x, y, logoSize, logoSize);
-                } else {
-                    logo.onload = () => {
-                        ctx.drawImage(logo, x, y, logoSize, logoSize);
-                    };
-                }
-            }
-        }
-    </script>
+      // 26: Merchant Account Information (GUI + chave [+ descrição opcional])
+      const mai = tlv('00', gui) + tlv('01', chave);
+      const p26 = tlv('26', mai);
+
+      // 52: Merchant Category Code (0000 = geral)
+      const p52 = tlv('52','0000');
+      // 53: Moeda (986 = BRL)
+      const p53 = tlv('53','986');
+      // 54: Valor (opcional)
+      const p54 = valor ? tlv('54', valor) : '';
+      // 58: País (BR)
+      const p58 = tlv('58','BR');
+      // 59: Nome (até 25)
+      const p59 = tlv('59', nome || 'LOJA');
+      // 60: Cidade (até 15)
+      const p60 = tlv('60', cidade || 'BRASIL');
+
+      // 62: Additional Data Field Template (05: txid)
+      const adf = tlv('05', txid);
+      const p62 = tlv('62', adf);
+
+      // Monta sem CRC e calcula
+      let payloadSemCRC = p00 + p01 + p26 + p52 + p53 + p54 + p58 + p59 + p60 + p62 + '6304';
+      const crc = crc16(payloadSemCRC).toString(16).toUpperCase().padStart(4,'0');
+
+      return payloadSemCRC + crc;
+    }
+
+    // -------------------------
+    // Listeners
+    // -------------------------
+    document.getElementById('generate').addEventListener('click',()=>{
+      if(tipoQR.value==='pix'){
+        state.data = generatePixPayload({
+          key: document.getElementById('pixKey').value,
+          amount: document.getElementById('pixAmount').value, // opcional
+          name: document.getElementById('pixName').value,
+          city: document.getElementById('pixCity').value,
+          txId: '' // pode trocar por um txid seu (máx 25)
+        });
+      } else {
+        state.data = document.getElementById('data').value||'';
+      }
+
+      state.size = clampNum(document.getElementById('size').value,120,1200);
+      state.margin = clampNum(document.getElementById('margin').value,0,40);
+      state.color = document.getElementById('color').value;
+      state.bgColor = document.getElementById('bgColor').value;
+      state.ecc = document.getElementById('ecc').value;
+      state.shape = document.getElementById('shape').value;
+      state.eyeColor = document.getElementById('eyeColor').value;
+      state.eyeStyle = document.getElementById('eyeStyle').value;
+      state.logoSize = clampNum(document.getElementById('logoSize').value,5,60);
+      state.logoMargin = clampNum(document.getElementById('logoMargin').value,0,20);
+      updateQR();
+    });
+
+    document.getElementById('downloadPng').addEventListener('click',()=>qr.download({name:'qrcode',extension:'png'}));
+    document.getElementById('downloadSvg').addEventListener('click',()=>qr.download({name:'qrcode',extension:'svg'}));
+
+    document.getElementById('logo').addEventListener('change', e=>{
+      const file = e.target.files?.[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload=()=>{ state.image = reader.result; updateQR(); };
+      reader.readAsDataURL(file);
+    });
+    document.getElementById('clearLogo').addEventListener('click',()=>{ state.image=null; document.getElementById('logo').value=''; updateQR(); });
+
+    // Primeira render
+    updateQR();
+  </script>
 </body>
 </html>
